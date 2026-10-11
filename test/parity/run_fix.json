@@ -1,0 +1,6 @@
+[["create_object", {"className": "Folder", "parent": "Workspace", "name": "ForgeParityStore"}],
+ ["insert_model", {"query": "tree", "parentPath": "Workspace.ForgeParityStore", "position": {"x": 0, "y": 700, "z": 0}}],
+ ["get_descendants", {"instancePath": "Workspace.ForgeParityStore", "classFilter": "LuaSourceContainer"}],
+ ["get_descendants", {"instancePath": "Workspace.ForgeParityStore", "maxDepth": 1}],
+ ["delete_object", {"instancePath": "Workspace.ForgeParityStore"}],
+ ["run_tests", {"seconds": 90}]]

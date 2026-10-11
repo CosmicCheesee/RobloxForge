@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+test/*.png
+test/*.jpeg
+test/*.jpg
+test/tpl/
+test/lint/
+test/*.log
+test/run_args.json
+test/settings_mount.lua
+test/DemoPanel.lua
+test/exported.json
+test/classes.json
+# machine-specific settings and generated output
+forge.local.json
+library/
+test/live/*.png
+test/live/*.json
+test/props/*.png
+test/props/props*.json
+test/anim/*.png
+test/studio_menus.json

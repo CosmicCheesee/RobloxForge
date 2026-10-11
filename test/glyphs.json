@@ -1,0 +1,6 @@
+{"ui":"screen","name":"GlyphTest","display_order":100,"children":[
+ {"ui":"column","pos":[0.5,0,0.5,0],"anchor":[0.5,0.5],"width":620,"bg":"@surface","radius":"lg","padding":"lg","gap":"sm","children":[
+  {"ui":"text","text":"BuilderSans: ♥ ⚡ ✓ ○ ◆ ✕ ↑ ⋯ ⚔ ✚ ◉ ☗ ⚙ ✦ ☂ ♜ ☀ ∞ ★ ▶ ⏸ ⟳ ✎ ✖ ✔ ⚠ ☰ ⬆ ⬇ ← →","variant":"title"},
+  {"ui":"text","text":"RobotoMono: ♥ ⚡ ✓ ○ ◆ ✕ ↑ ⋯ ⚔ ✚ ◉ ☗ ⚙ ✦ ☂ ♜ ☀ ∞ ★ ▶","variant":"mono","size":18},
+  {"ui":"text","text":"Emoji: ❤️ 🔦 🗝️ 💰 ⭐ 🎒 🔒 🔓 ⚙️ 🏆","variant":"title"}
+ ]}]}

@@ -1,0 +1,25 @@
+{"ui":"screen","name":"Demo","children":[
+  {"ui":"sidebar","title":"Conversations","width":280,"children":[
+     {"ui":"button","text":"New chat","icon":"+","width":"fill","variant":"secondary"},
+     {"ui":"list","selected":0,"items":[
+        {"title":"Backrooms lighting pass","subtitle":"Shadows, budgets, governor","trailing":"2h"},
+        {"title":"Streaming radius fix","subtitle":"Fog is flat at 140","trailing":"1d"},
+        {"title":"Merit stack shop","subtitle":"Six upgrades","trailing":"3d"}]},
+     {"ui":"progress","label":"Storage","value":0.62}
+  ]},
+  {"ui":"column","pos":[0,300,0,0],"width":[1,-300],"height":"fill","padding":"xl","gap":"lg","children":[
+     {"ui":"header","title":"RobloxForge","subtitle":"modern-dark theme","children":[
+        {"ui":"tabs","items":["Chat","Files","Settings"],"selected":0},
+        {"ui":"button","text":"Share","variant":"primary","size":"sm"}]},
+     {"ui":"chat","height":360,"messages":[
+        {"role":"user","text":"Can you make the HUD feel like a modern AI app?"},
+        {"role":"assistant","text":"Yes. Start with tokens: one accent, layered surfaces, 8px spacing rhythm, and text that never sits below 4.5:1 contrast."}]},
+     {"ui":"row","gap":"md","children":[
+        {"ui":"stat","label":"FPS while loading","value":"83","delta":"+68%","width":200},
+        {"ui":"stat","label":"Resident chunks","value":"12","delta":"-60%","width":200},
+        {"ui":"card","width":260,"title":"Settings","children":[
+           {"ui":"toggle","label":"Shadows","on":true},
+           {"ui":"slider","label":"Field of view","value":0.4},
+           {"ui":"row","gap":"xs","children":[{"ui":"chip","text":"beta","tone":"accent"},{"ui":"chip","text":"stable","tone":"success"},{"ui":"keycap","key":"E","label":"interact"}]}]}]}
+  ]}
+]}

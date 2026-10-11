@@ -1,0 +1,4 @@
+mcp>=2.3
+mcp-types>=2.3
+numpy>=2.0
+pillow>=11.0
