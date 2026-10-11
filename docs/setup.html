@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect RobloxForge to your AI app</title>
+<meta name="description" content="Set up RobloxForge and connect it to Claude, ChatGPT / Codex, Gemini CLI, Cursor, VS Code Copilot, Devin Desktop / Windsurf, Zed or LM Studio.">
+<style>
+:root{--bg:#0e0f12;--panel:#16181d;--panel2:#1c1f26;--line:#262a33;--text:#e8e6df;--muted:#9a9a93;--accent:#e9c46a;--accent2:#7fb7ff;--good:#7ad69a;--bad:#6b6b66}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--accent2)}code,pre{font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+.wrap{max-width:980px;margin:auto;padding:0 22px}
+header{padding:46px 0 10px}header a.back{font-size:13px;text-decoration:none;color:var(--muted)}
+h1{font-size:36px;margin:8px 0 6px;letter-spacing:-.4px}h1 b{color:var(--accent)}
+.lede{color:var(--muted);font-size:17px;margin:0}
+h2{font-size:20px;margin:42px 0 14px;display:flex;align-items:center;gap:12px}
+h2 .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#1a1505;font-size:15px;font-weight:700;flex:none}
+/* support grid */
+table.grid{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:18px}
+.grid th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;text-align:left;padding:0 12px}
+.grid td{background:var(--panel);padding:10px 12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.grid td:first-child{border-left:1px solid var(--line);border-radius:10px 0 0 10px;font-weight:600}
+.grid td:last-child{border-right:1px solid var(--line);border-radius:0 10px 10px 0}
+.grid td small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #2e5a3d;background:#15251b;color:var(--good);border-radius:99px;padding:4px 11px;font-size:13.5px;cursor:pointer;text-decoration:none}
+.pill:hover{background:#1c3324}.pill svg{width:15px;height:15px}
+.no{color:var(--bad);font-size:13.5px}
+/* boxes */
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+.need{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.need .box{margin:0;display:flex;gap:12px;align-items:center}.need svg{width:30px;height:30px;flex:none;color:var(--accent)}
+.need b{display:block}.need span{color:var(--muted);font-size:13px}
+.code{position:relative;margin:8px 0}
+.code pre{margin:0;background:#0a0b0d;border:1px solid var(--line);border-radius:10px;padding:12px 84px 12px 14px;overflow:auto;white-space:pre}
+.code button{position:absolute;top:8px;right:8px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:4px 10px;font-size:12px;cursor:pointer}
+.code button.done{color:var(--good);border-color:#2e5a3d}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{background:var(--panel);color:var(--muted);border:0;padding:7px 14px;cursor:pointer;font-size:14px}
+.seg button.on{background:var(--accent);color:#1a1505;font-weight:600}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+input#dir{flex:1;min-width:260px;padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:#0a0b0d;color:var(--text);font:13.5px ui-monospace,Consolas,monospace}
+label.small{color:var(--muted);font-size:13px}
+/* app picker */
+.apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.apps button{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;text-align:left;cursor:pointer;font-size:14px}
+.apps button small{display:block;color:var(--muted);font-size:12px}
+.apps button.on{border-color:var(--accent);background:#221d10}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-top:14px}
+.card h3{margin:0 0 2px;font-size:19px}.card .maker{color:var(--muted);font-size:13px}
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0 0}
+ol.steps>li{counter-increment:s;position:relative;padding:0 0 14px 38px}
+ol.steps>li:before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:13px;color:var(--muted)}
+.tip{border-left:3px solid var(--accent);background:#1d1a12;padding:9px 12px;border-radius:0 8px 8px 0;font-size:14px;margin:10px 0}
+details{margin-top:6px}summary{cursor:pointer;color:var(--accent2);font-size:14px}
+.ok{display:flex;gap:10px;align-items:flex-start}.ok svg{width:22px;height:22px;color:var(--good);flex:none;margin-top:2px}
+.faq .box{margin:8px 0}.faq b{display:block;margin-bottom:2px}.faq span{color:var(--muted);font-size:14px}
+footer{color:var(--muted);font-size:13px;text-align:center;padding:40px 0}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute">
+ <symbol id="i-term" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M12 15h5"/></symbol>
+ <symbol id="i-app" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="15" rx="2"/><path d="M2 7h20M8 21h8M12 18v3"/></symbol>
+ <symbol id="i-py" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-4 0-4 1.6-4 3v2h4.5M12 21c4 0 4-1.6 4-3v-2h-4.5"/><path d="M8 8H6c-2 0-3 1.5-3 4s1 4 3 4h2v-2.5C8 12 9 11 10.5 11h3c1.5 0 2.5-1 2.5-2.5V6c0-1.4-1-3-4-3M16 16h2c2 0 3-1.5 3-4s-1-4-3-4h-2"/></symbol>
+ <symbol id="i-node" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/></symbol>
+ <symbol id="i-studio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" transform="rotate(15 12 12)"/><rect x="10" y="10" width="4" height="4" transform="rotate(15 12 12)"/></symbol>
+ <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></symbol>
+</svg>
+<div class="wrap">
+<header>
+<a class="back" href="./">&larr; RobloxForge</a>
+<h1>Connect Roblox<b>Forge</b> to your AI</h1>
+<p class="lede">About five minutes. One command sets it up, one more connects your app.</p>
+</header>
+
+<table class="grid" id="matrix">
+<thead><tr><th>Who makes it</th><th>In the terminal</th><th>Desktop app</th></tr></thead>
+<tbody></tbody>
+</table>
+<p class="label small" style="color:var(--muted);font-size:13px;margin:4px 2px">Websites (claude.ai, chatgpt.com, gemini.google.com) can't start programs on your computer, so they can't run RobloxForge -- use a terminal or desktop app above.</p>
+
+<h2><span class="n">1</span>Install these first</h2>
+<div class="need">
+ <div class="box"><svg><use href="#i-py"/></svg><div><b>Python 3.11+</b><span><a href="https://www.python.org/downloads/">python.org</a> &middot; on Windows tick &ldquo;Add to PATH&rdquo;</span></div></div>
+ <div class="box"><svg><use href="#i-node"/></svg><div><b>Node.js LTS</b><span><a href="https://nodejs.org/">nodejs.org</a> &middot; runs the Studio bridge</span></div></div>
+ <div class="box"><svg><use href="#i-studio"/></svg><div><b>Roblox Studio</b><span><a href="https://create.roblox.com/">create.roblox.com</a></span></div></div>
+</div>
+
+<h2><span class="n">2</span>Download and set up RobloxForge</h2>
+<div class="row" style="margin-bottom:6px">
+ <div class="seg" id="os"><button data-os="win">Windows</button><button data-os="mac">macOS</button><button data-os="linux">Linux</button></div>
+</div>
+<div class="box">
+ <div class="code"><pre data-t="install"></pre></div>
+ <p style="margin:8px 0 0;color:var(--muted);font-size:14px">No git? <a href="https://github.com/CosmicCheesee/RobloxForge/archive/refs/heads/main.zip">Download the ZIP</a>, unzip it, open a terminal in the folder and run the last line.</p>
+ <div class="ok" style="margin-top:12px"><svg><use href="#i-check"/></svg><div>It ends with a list of apps. That means Python, the packages and Node are all fine.</div></div>
+</div>
+<div class="row" style="margin-top:14px">
+ <label class="small" for="dir">Where is your RobloxForge folder? (fills in the snippets below)</label>
+ <input id="dir" spellcheck="false">
+</div>
+
+<h2><span class="n">3</span>Pick your app</h2>
+<div class="apps" id="apps"></div>
+<div id="card"></div>
+
+<h2><span class="n">4</span>Check it works</h2>
+<div class="box">
+ <ol class="steps">
+  <li>Open Roblox Studio and open any place. The first time, <b>restart Studio once</b> -- RobloxForge installs its Studio plugin when it first starts. If Studio asks whether the plugin may connect to <code>localhost</code>, click <b>Allow</b>.</li>
+  <li>Ask your AI: <div class="code"><pre>Run forge_status</pre></div></li>
+  <li><div class="ok"><svg><use href="#i-check"/></svg><div>You want <code>"bridge": "up"</code> and your place listed under <code>"studio"</code>. Done -- try <i>&ldquo;make a lamp post with model_build and show me model_shots&rdquo;</i>.</div></div></li>
+ </ol>
+</div>
+
+<h2>If something's wrong</h2>
+<div class="faq">
+ <div class="box"><b>The app doesn't show robloxforge</b><span>Quit it completely (desktop apps: also from the tray / menu bar) and reopen. Still missing? Run <code>python connect.py check</code> in the RobloxForge folder -- it should answer with 204 tools.</span></div>
+ <div class="box"><b><code>"bridge": "down"</code></b><span>Node.js isn't installed, or its first download was blocked. Install Node LTS, reopen the app.</span></div>
+ <div class="box"><b>Bridge is up but no Studio</b><span>Open a place in Studio. After the first run, restart Studio once so it loads the plugin.</span></div>
+ <div class="box"><b>&ldquo;Too many tools&rdquo; or the model gets confused</b><span>Connect with fewer tools: add <code>--tools core</code> (95 tools: Studio, instances, scripts, playtests) or pick groups, e.g. <code>--tools core,ui,animation</code>. Group names are on the <a href="./#tools">tool list</a>.</span></div>
+ <div class="box"><b>Undo</b><span><code>connect.py</code> saves a backup next to every file it changes (<code>.bak-date</code>). Or delete the <code>robloxforge</code> entry from the app's settings.</span></div>
+</div>
+<footer>RobloxForge &middot; MIT &middot; <a href="https://github.com/CosmicCheesee/RobloxForge">GitHub</a></footer>
+</div>
+
+<script>
+const ICON = {t:'<svg><use href="#i-term"/></svg>', d:'<svg><use href="#i-app"/></svg>'};
+// one entry per app. kind: t = terminal, d = desktop.
+const APPS = [
+ {id:'claude-code', name:'Claude Code', maker:'Anthropic', kind:'t',
+  verify:'Run <code>claude mcp list</code> &mdash; robloxforge shows <b>Connected</b>. Inside a session, <code>/mcp</code> lists it too.',
+  manual:p=>({where:'Run in a terminal:', text:`claude mcp add robloxforge -s user -- ${q(p.py)} ${q(p.srv)}`})},
+ {id:'claude-desktop', name:'Claude Desktop', maker:'Anthropic', kind:'d',
+  verify:'Click <b>+</b> under the message box &rarr; <b>Connectors</b> &mdash; robloxforge is listed.',
+  manual:p=>({where:'Claude menu &rarr; <b>Settings&hellip;</b> &rarr; <b>Developer</b> &rarr; <b>Edit Config</b>, and add inside <code>"mcpServers"</code>:', text:entry(p)})},
+ {id:'codex', name:'Codex CLI', maker:'OpenAI', kind:'t', also:'chatgpt',
+  verify:'Run <code>codex mcp list</code>, or <code>/mcp</code> inside Codex.',
+  note:'This also connects the <b>ChatGPT desktop app</b> (its Codex side): they share one settings file.',
+  manual:p=>({where:'Add to <code>~/.codex/config.toml</code> (the longer timeouts matter: playtest tools can take minutes):', text:toml(p)})},
+ {id:'chatgpt', name:'ChatGPT desktop', maker:'OpenAI', kind:'d', same:'codex',
+  verify:'Open <b>Codex</b> in the ChatGPT desktop app &mdash; robloxforge is in its MCP server settings.',
+  note:'The ChatGPT app runs local tools through its Codex side, which shares Codex CLI&rsquo;s settings &mdash; so it&rsquo;s the same command. The chatgpt.com website can&rsquo;t run local tools.',
+  manual:p=>({where:'Add to <code>~/.codex/config.toml</code>:', text:toml(p)})},
+ {id:'gemini', name:'Gemini CLI', maker:'Google', kind:'t',
+  verify:'Start <code>gemini</code> and type <code>/mcp list</code>.',
+  manual:p=>({where:'Add inside <code>"mcpServers"</code> in <code>~/.gemini/settings.json</code>:', text:entry(p)})},
+ {id:'vscode', name:'VS Code + Copilot', maker:'GitHub / Microsoft', kind:'d',
+  verify:'Command Palette &rarr; <b>MCP: List Servers</b> &mdash; start robloxforge if it says stopped. Use Copilot Chat in <b>Agent</b> mode.',
+  manual:p=>({where:'Command Palette &rarr; <b>MCP: Open User Configuration</b>, and add inside <code>"servers"</code>:', text:entry(p,{type:'stdio'})})},
+ {id:'cursor', name:'Cursor', maker:'Anysphere', kind:'d',
+  verify:'Open <b>Customize</b> in the sidebar &mdash; robloxforge is listed and switched on.',
+  manual:p=>({where:'Add inside <code>"mcpServers"</code> in <code>~/.cursor/mcp.json</code>:', text:entry(p,{type:'stdio'})})},
+ {id:'windsurf', name:'Devin Desktop / Windsurf', maker:'Cognition', kind:'d', tools:'core',
+  verify:'Cascade panel &rarr; <b>&hellip;</b> menu &rarr; <b>MCPs</b> &mdash; robloxforge is listed.',
+  note:'Cascade allows at most <b>100 tools in total</b>, so this adds the 95-tool <code>core</code> set. Swap groups with <code>--tools</code>.',
+  manual:p=>({where:'Cascade panel &rarr; <b>&hellip;</b> &rarr; <b>Open MCP config file</b>, and add inside <code>"mcpServers"</code>:', text:entry(p,{},'core')})},
+ {id:'zed', name:'Zed', maker:'Zed Industries', kind:'d', paste:true,
+  verify:'<b>Settings &rarr; AI &rarr; MCP Servers</b> &mdash; robloxforge has a green dot.',
+  manual:p=>({where:'<b>Settings &rarr; AI &rarr; MCP Servers &rarr; Add Server &rarr; Add Local Server</b>, and paste:', text:entry(p,{env:{}})})},
+ {id:'lmstudio', name:'LM Studio', maker:'Element Labs &middot; local models', kind:'d', paste:true,
+  verify:'The <b>Program</b> tab lists robloxforge. Pick a model that supports tool use; small models do best with <code>FORGE_TOOLS</code> set to <code>core</code>.',
+  manual:p=>({where:'Right-hand sidebar &rarr; <b>Program</b> tab &rarr; <b>Install</b> &rarr; <b>Edit mcp.json</b>, and add inside <code>"mcpServers"</code>:', text:entry(p)})},
+];
+const MAKERS = [
+ ['Anthropic','Claude','claude-code','claude-desktop'],
+ ['OpenAI','ChatGPT / Codex','codex','chatgpt'],
+ ['Google','Gemini','gemini',null],
+ ['GitHub / Microsoft','Copilot',null,'vscode'],
+ ['Anysphere','Cursor',null,'cursor'],
+ ['Cognition','Devin / Windsurf',null,'windsurf'],
+ ['Zed Industries','Zed',null,'zed'],
+ ['Element Labs','LM Studio (local models)',null,'lmstudio'],
+];
+const byId = Object.fromEntries(APPS.map(a=>[a.id,a]));
+let OS = /Mac/.test(navigator.platform) ? 'mac' : /Linux/.test(navigator.platform) ? 'linux' : 'win';
+let DIR = '', APP = null;
+const defDir = () => OS==='win' ? 'C:\\Users\\you\\RobloxForge' : OS==='mac' ? '/Users/you/RobloxForge' : '/home/you/RobloxForge';
+function paths(){
+ const d = (DIR || defDir()).replace(/[\\/]+$/,'');
+ const sep = OS==='win' ? '\\' : '/';
+ return {dir:d, py: OS==='win' ? d+'\\.venv\\Scripts\\python.exe' : d+'/.venv/bin/python', srv: d+sep+'server.py',
+         run: OS==='win' ? 'python' : 'python3'};
+}
+const q = s => /\s/.test(s) ? `"${s}"` : s;
+function entry(p, extra={}, tools){
+ const e = Object.assign({}, extra.type?{type:extra.type}:{}, {command:p.py, args:[p.srv]});
+ if (tools) e.env = {FORGE_TOOLS:tools}; else if (extra.env) e.env = extra.env;
+ return '"robloxforge": ' + JSON.stringify(e, null, 2);
+}
+function toml(p){
+ return `[mcp_servers.robloxforge]\ncommand = ${JSON.stringify(p.py)}\nargs = [${JSON.stringify(p.srv)}]\nstartup_timeout_sec = 120\ntool_timeout_sec = 300`;
+}
+function codeBlock(text){
+ const esc = text.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+ return `<div class="code"><pre>${esc}</pre><button>Copy</button></div>`;
+}
+function renderMatrix(){
+ const cell = id => {
+  if (!id) return '<span class="no">&mdash;</span>';
+  const a = byId[id];
+  return `<a class="pill" href="#card" data-app="${id}">${ICON[a.kind]} ${a.name}</a>`;
+ };
+ document.querySelector('#matrix tbody').innerHTML = MAKERS.map(([m,prod,t,d]) =>
+  `<tr><td>${prod}<small>${m}</small></td><td>${cell(t)}</td><td>${cell(d)}</td></tr>`).join('');
+}
+function renderInstall(){
+ const p = paths();
+ const pre = document.querySelector('pre[data-t=install]');
+ pre.textContent = `git clone https://github.com/CosmicCheesee/RobloxForge\ncd RobloxForge\n${p.run} connect.py`;
+ if (!pre.nextElementSibling) pre.insertAdjacentHTML('afterend','<button>Copy</button>');
+}
+function renderApps(){
+ document.getElementById('apps').innerHTML = APPS.map(a =>
+  `<button data-app="${a.id}" class="${a.id===APP?'on':''}">${a.name}<small>${a.kind==='t'?'terminal':'desktop app'} &middot; ${a.maker.split(' &middot;')[0]}</small></button>`).join('');
+}
+function renderCard(){
+ const el = document.getElementById('card');
+ if (!APP){ el.innerHTML = ''; return; }
+ const a = byId[APP], p = paths(), m = a.manual(p);
+ const cmd = `${p.run} connect.py ${a.same || a.id}`;
+ const steps = [];
+ if (a.paste) {
+  steps.push(`<li>${m.where}${codeBlock(m.text)}<span style="color:var(--muted);font-size:13px">Or run <code>${cmd}</code> to print this with your exact paths.</span></li>`);
+ } else {
+  steps.push(`<li>In the RobloxForge folder, run:${codeBlock(cmd)}</li>`);
+ }
+ steps.push(`<li>${a.kind==='t' ? 'Start a new session.' : 'Fully quit the app (also from the tray / menu bar) and open it again.'}</li>`);
+ steps.push(`<li><div class="ok"><svg><use href="#i-check"/></svg><div>${a.verify}</div></div></li>`);
+ el.innerHTML = `<div class="card"><h3>${ICON[a.kind].replace('<svg>','<svg style="width:18px;height:18px;vertical-align:-3px;margin-right:6px">')}${a.name}</h3>
+  <div class="maker">${a.maker} &middot; ${a.kind==='t'?'terminal':'desktop app'}</div>
+  ${a.note ? `<div class="tip">${a.note}</div>` : ''}
+  <ol class="steps">${steps.join('')}</ol>
+  ${a.paste ? '' : `<details><summary>Do it by hand instead</summary><p style="font-size:14px;margin:10px 0 4px">${m.where}</p>${codeBlock(m.text)}</details>`}
+  </div>`;
+}
+function pick(id){ APP = id; renderApps(); renderCard(); }
+function renderAll(){
+ document.querySelectorAll('#os button').forEach(b=>b.classList.toggle('on', b.dataset.os===OS));
+ const d = document.getElementById('dir'); d.placeholder = defDir();
+ renderInstall(); renderCard();
+}
+document.addEventListener('click', e => {
+ const b = e.target.closest('.code button');
+ if (b){ navigator.clipboard.writeText(b.previousElementSibling.textContent).then(()=>{b.textContent='Copied';b.classList.add('done');
+   setTimeout(()=>{b.textContent='Copy';b.classList.remove('done')},1400)}); return; }
+ const o = e.target.closest('#os button'); if (o){ OS = o.dataset.os; renderAll(); return; }
+ const a = e.target.closest('[data-app]'); if (a){ pick(a.dataset.app); if (a.tagName==='A'){ e.preventDefault(); document.getElementById('apps').scrollIntoView({behavior:'smooth'}); } }
+});
+document.getElementById('dir').addEventListener('input', e => { DIR = e.target.value.trim(); renderCard(); });
+renderMatrix(); renderApps(); renderAll();
+const h = location.hash.slice(1); if (byId[h]) pick(h);
+</script>
+</body></html>

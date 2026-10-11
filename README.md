@@ -19,19 +19,34 @@ cannot draw.
 
 ## Quick start
 
-Needs Windows or macOS with Roblox Studio, Python 3.11+, Node.js (for `npx`), and the Studio MCP plugin that
-`@chrrxs/robloxstudio-mcp` installs (`--auto-install-plugin`, or see its README).
+**Step-by-step guide for every app: https://cosmiccheesee.github.io/RobloxForge/setup.html**
+
+Needs Roblox Studio, Python 3.11+ and Node.js LTS.
 
 ```
 git clone https://github.com/CosmicCheesee/RobloxForge
 cd RobloxForge
-python -m venv .venv
-.venv/Scripts/python -m pip install -r requirements.txt        # macOS/Linux: .venv/bin/python
-claude mcp add robloxforge -s user -- <full path>/.venv/Scripts/python.exe <full path>/server.py
+python connect.py                  # sets up .venv + packages, checks Node, lists the apps
+python connect.py claude-code      # then connect your app (add --print to preview the change)
 ```
 
-Open Studio with the plugin enabled, start a new Claude Code session, and `/mcp` lists RobloxForge.
-`forge_status` checks the bridge, the connected Studio, Rojo and git in one call.
+| Who makes it | Terminal | Desktop app |
+|---|---|---|
+| Anthropic | `claude-code` | `claude-desktop` |
+| OpenAI | `codex` | `codex` -- the ChatGPT desktop app shares Codex's settings |
+| Google | `gemini` | -- |
+| GitHub / Microsoft | -- | `vscode` (Copilot agent mode) |
+| Anysphere | -- | `cursor` |
+| Cognition | -- | `windsurf` (Devin Desktop / Windsurf; adds the 95-tool `core` set, as Cascade allows 100 tools) |
+| Zed Industries | -- | `zed` (prints the entry to paste) |
+| Element Labs | -- | `lmstudio` (prints the entry to paste) |
+
+`connect.py` backs up every file it changes. Websites (claude.ai, chatgpt.com) can't start local programs, so
+they can't run RobloxForge. Restart the app, open a place in Studio (restart Studio once after the first run, so
+it loads the plugin), and ask for `forge_status`: you want `"bridge": "up"` and your place under `"studio"`.
+
+**Fewer tools:** `--tools core` (Studio, instances, scripts, playtests) or a list of groups such as
+`--tools core,ui,animation` -- the setting is `FORGE_TOOLS` / `"tools"`, and the groups are named on the site.
 
 **Configuration** (all optional): copy `forge.local.example.json` to `forge.local.json` (git-ignored) or set the
 matching environment variables -- `repo` / `FORGE_REPO` (your Rojo project, for the repo tools), `selene` /
@@ -196,6 +211,10 @@ the SelfTest run).
 - Wedges rise toward +Z.
 
 ## Setup details
+
+The Studio bridge is pinned to the robloxstudio-mcp version RobloxForge was tested with (3.2.0), and its matching
+Studio plugin is installed on start. Newer releases are never picked up by surprise: to try one, set
+`FORGE_BRIDGE_VERSION` or `"bridge_version"` in forge.local.json. `forge_status` reports the version in use.
 
 If robloxstudio-mcp is also registered on its own, RobloxForge's copy goes into proxy mode behind it on :58741
 and still works; remove the standalone entry to avoid listing its 49 tools twice. `FORGE_CHILD_CMD` overrides

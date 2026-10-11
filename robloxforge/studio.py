@@ -23,15 +23,60 @@ class ForgeError(Exception):
     pass
 
 
+# ===== THE STUDIO BRIDGE IS PINNED =====
+# robloxstudio-mcp is started with npx. It used to be `@latest`, which meant every launch could pick up a new
+# release: unreviewed code running on this machine with full access to the open place, and a reply shape
+# that RobloxForge parses could change under it without notice. It is pinned to the version RobloxForge was
+# tested against; upgrade on purpose with FORGE_BRIDGE_VERSION or "bridge_version" in forge.local.json.
+BRIDGE_PKG = "@chrrxs/robloxstudio-mcp"
+BRIDGE_VERSION = "3.2.0"
+
+
+def _local_cfg() -> dict:
+    f = Path(__file__).resolve().parent.parent / "forge.local.json"
+    try:
+        return json.loads(f.read_text(encoding="utf-8")) if f.is_file() else {}
+    except ValueError:
+        return {}
+
+
+def _find_npx() -> str | None:
+    """The full path to npx. Desktop apps start servers with a minimal PATH, so a bare `npx` that works in a
+    terminal can fail there; look in the usual Node install locations as well."""
+    import glob
+    import shutil
+    for name in ("npx.cmd", "npx") if os.name == "nt" else ("npx",):
+        hit = shutil.which(name)
+        if hit:
+            return hit
+    home = Path.home()
+    cands = ["C:/Program Files/nodejs/npx.cmd", str(home / "AppData/Roaming/npm/npx.cmd"),
+             "/opt/homebrew/bin/npx", "/usr/local/bin/npx", "/usr/bin/npx"]
+    cands += sorted(glob.glob(str(home / ".nvm/versions/node/*/bin/npx")), reverse=True)
+    cands += sorted(glob.glob(str(home / "AppData/Roaming/nvm/*/npx.cmd")), reverse=True)
+    for c in cands:
+        if Path(c).is_file():
+            return c
+    return None
+
+
 def child_params() -> StdioServerParameters:
     """FORGE_CHILD_CMD overrides the child command line (space separated)."""
     cmd = os.environ.get("FORGE_CHILD_CMD")
     if cmd:
         parts = cmd.split()
         return StdioServerParameters(command=parts[0], args=parts[1:])
+    ver = os.environ.get("FORGE_BRIDGE_VERSION") or _local_cfg().get("bridge_version") or BRIDGE_VERSION
+    pkg = f"{BRIDGE_PKG}@{ver}"
+    npx = _find_npx()
+    env = dict(os.environ)
+    if npx:
+        # npx needs node beside it on PATH (on macOS it is a `#!/usr/bin/env node` script)
+        env["PATH"] = str(Path(npx).parent) + os.pathsep + env.get("PATH", "")
+    # --auto-install-plugin puts the matching Studio plugin in place (and keeps it matched to the pinned version)
     if os.name == "nt":
-        return StdioServerParameters(command="cmd", args=["/c", "npx", "-y", "@chrrxs/robloxstudio-mcp@latest"])
-    return StdioServerParameters(command="npx", args=["-y", "@chrrxs/robloxstudio-mcp@latest"])
+        return StdioServerParameters(command="cmd", args=["/c", npx or "npx", "-y", pkg, "--auto-install-plugin"], env=env)
+    return StdioServerParameters(command=npx or "npx", args=["-y", pkg, "--auto-install-plugin"], env=env)
 
 
 def long_string(s: str) -> str:

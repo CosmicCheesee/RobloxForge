@@ -467,6 +467,14 @@ async def notes_search(a):
 async def forge_status(a):
     st = {"bridge": "up" if STUDIO.child else f"down: {STUDIO.error}", "bridged_tools": len(STUDIO.tools),
           "native_tools": len(NATIVE), "rojo": "serving" if _port_open(ROJO_PORT) else "not running", "repo": str(REPO)}
+    from .groups import ORDER, selection
+    from .studio import BRIDGE_VERSION
+    keep = selection(_setting("FORGE_TOOLS", "tools", "all"))
+    st["bridge_version"] = os.environ.get("FORGE_BRIDGE_VERSION") or _CFG.get("bridge_version") or BRIDGE_VERSION
+    st["tools_setting"] = "all" if keep is None else sorted(keep)
+    st["tools_visible"] = sum(_visible(n) for n in list(NATIVE) + list(STUDIO.tools))
+    if keep is not None and keep - set(ORDER):
+        st["unknown_tool_groups"] = sorted(keep - set(ORDER))
     if STUDIO.child:
         with contextlib.suppress(Exception):
             r = await STUDIO.call("get_connected_instances", {}, 20)
@@ -493,12 +501,23 @@ async def lifespan(_server):
             STUDIO.child = None
 
 
+def _visible(name: str) -> bool:
+    """The `tools` setting (FORGE_TOOLS / forge.local.json): all, core, or a list of groups -- see groups.py."""
+    from .groups import group_of, selection
+    keep = selection(_setting("FORGE_TOOLS", "tools", "all"))
+    return keep is None or group_of(name) in keep
+
+
 async def on_list_tools(ctx, params):
-    return types.ListToolsResult(tools=[t for t, _ in NATIVE.values()] + list(STUDIO.tools.values()))
+    tools = [t for t, _ in NATIVE.values()] + list(STUDIO.tools.values())
+    return types.ListToolsResult(tools=[t for t in tools if _visible(t.name)])
 
 
 async def on_call_tool(ctx, params):
     name, args = params.name, params.arguments or {}
+    if not _visible(name):
+        return types.CallToolResult(content=[text(f"{name} is switched off by the `tools` setting (FORGE_TOOLS)")],
+                                    is_error=True)
     if name in NATIVE:
         try:
             return types.CallToolResult(content=await NATIVE[name][1](args))

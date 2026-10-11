@@ -15,50 +15,7 @@ from mcp.client.stdio import StdioServerParameters
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-GROUPS = [
-    ("Animation", lambda n: n.startswith("anim_") or n.startswith("animation_")),
-    ("UI design, build and audit", lambda n: n.startswith("ui_")),
-    ("Play like a player", lambda n: n.startswith("play_") or n in {"studio_filmstrip", "character_navigation"}),
-    ("Modelling and visual checks", lambda n: n.startswith(("model_", "parts_")) or n in {"map_plan"}),
-    ("Build library", lambda n: n in {"export_build", "create_build", "generate_build", "import_build", "list_library",
-                                       "get_build", "import_scene"}),
-    ("Open Cloud (live game)", lambda n: n.startswith("opencloud_") or n == "place_publish"),
-    ("Terrain", lambda n: n.startswith("terrain_")),
-    ("Lighting, effects, sound and materials", lambda n: n.startswith(("lighting_", "particle_", "sound_", "material_",
-                                                                         "textchat_")) or n in {"tween_preview",
-                                                                                                 "search_materials",
-                                                                                                 "humanoid_description_apply"}),
-    ("Measuring performance", lambda n: n.startswith(("perf_", "profile_", "capture_")) or n in {"get_memory_breakdown",
-                                                                                                   "get_scene_analysis",
-                                                                                                   "streamingenabled_audit"}),
-    ("Playtests, tests and debugging", lambda n: n in {"start_playtest", "stop_playtest", "get_playtest_output",
-                                                         "run_script_in_play_mode", "run_tests", "wait_for", "debug_watch",
-                                                         "debug_collisions", "solo_playtest", "multiplayer_playtest",
-                                                         "get_runtime_logs", "get_output_log", "breakpoints",
-                                                         "eval_server_runtime", "eval_client_runtime", "game_selftest",
-                                                         "get_studio_mode", "viewport_pick", "set_network_profile",
-                                                         "get_simulation_state", "reset_simulation_state",
-                                                         "simulate_keyboard_input", "simulate_mouse_input",
-                                                         "set_device_simulator", "get_device_simulator_state"}),
-    ("Scripts, source and repo", lambda n: "script" in n or n.startswith(("source_", "repo_", "rojo_")) or n in {
-        "luau_check", "notes_search", "grep_scripts", "find_and_replace_in_scripts", "execute_luau",
-        "execute_luau_from_file", "list_scripts"}),
-    ("Assets and files", lambda n: "asset" in n or n in {"insert_model", "import_rbxm", "export_rbxm", "generate_model"}),
-    ("Instances, properties, attributes and tags", lambda n: True),
-]
-
-STUDIO_NAMES = {"forge_status", "get_handler_health", "studio_identity", "studio_activity", "get_connected_instances",
-                "manage_instance", "get_place_info", "get_request_status", "get_roblox_docs", "get_roblox_skills",
-                "manage_monetization"}
-
-
-def group_of(name):
-    if name in STUDIO_NAMES:
-        return "Studio and session"
-    for g, test in GROUPS:
-        if test(name):
-            return g
-    return "Other"
+from robloxforge.groups import ORDER, TITLES, group_of  # noqa: E402
 
 
 async def main():
@@ -70,9 +27,8 @@ async def main():
     by = {}
     for t in tools:
         by.setdefault(group_of(t.name), []).append(t)
-    order = ["Studio and session"] + [g for g, _ in GROUPS]
     cards = []
-    for g in order:
+    for g in ORDER:
         ts = sorted(by.get(g, []), key=lambda t: t.name)
         if not ts:
             continue
@@ -86,10 +42,11 @@ async def main():
                 first += "."
             props = ", ".join(sorted((t.input_schema or {}).get("properties", {}).keys()))
             badge = '<span class="b n">forge</span>' if t.name in native else '<span class="b s">bridge</span>'
-            rows.append(f'<li data-k="{html.escape((t.name + " " + desc).lower())}"><code>{html.escape(t.name)}</code>'
+            rows.append(f'<li data-k="{html.escape((t.name + " " + desc + " " + g).lower())}"><code>{html.escape(t.name)}</code>'
                         f'{badge}<p>{html.escape(first)}</p>'
                         + (f'<small>{html.escape(props)}</small>' if props else "") + "</li>")
-        cards.append(f'<section><h2>{html.escape(g)} <span>{len(ts)}</span></h2><ul>{"".join(rows)}</ul></section>')
+        cards.append(f'<section><h2>{html.escape(TITLES[g])} <span>{len(ts)} &middot; group <code>{g}</code></span></h2>'
+                     f'<ul>{"".join(rows)}</ul></section>')
     total = len(tools)
     page = TEMPLATE.replace("{{TOTAL}}", str(total)).replace("{{NATIVE}}", str(len(native))) \
         .replace("{{BRIDGED}}", str(total - len(native))).replace("{{CARDS}}", "\n".join(cards))
@@ -131,7 +88,7 @@ footer{color:var(--muted);font-size:13px;text-align:center;padding:30px}
 numeric audits, a UI designer with an offline layout engine, animation checks, performance measurement, script sync to
 disk, Open Cloud -- and offline rendering that keeps working when Studio cannot draw.</p>
 <div class="stats"><div><b>{{TOTAL}}</b>tools</div><div><b>{{NATIVE}}</b>native</div><div><b>{{BRIDGED}}</b>bridged from robloxstudio-mcp</div><div><b>MIT</b>licence</div></div>
-<div class="cta"><a href="https://github.com/CosmicCheesee/RobloxForge">GitHub</a><a class="alt" href="#start">Quick start</a><a class="alt" href="#tools">All tools</a></div>
+<div class="cta"><a href="https://github.com/CosmicCheesee/RobloxForge">GitHub</a><a class="alt" href="setup.html">Connect your AI</a><a class="alt" href="#tools">All tools</a></div>
 </header>
 <main>
 <div class="why">
@@ -143,10 +100,9 @@ disk, Open Cloud -- and offline rendering that keeps working when Studio cannot 
 <h2 id="start">Quick start</h2>
 <pre>git clone https://github.com/CosmicCheesee/RobloxForge
 cd RobloxForge
-python -m venv .venv
-.venv/Scripts/python -m pip install -r requirements.txt
-claude mcp add robloxforge -s user -- &lt;full path&gt;/.venv/Scripts/python.exe &lt;full path&gt;/server.py</pre>
-<p>Needs Roblox Studio with the robloxstudio-mcp plugin, Python 3.11+ and Node.js. Start a new Claude Code session and <code>/mcp</code> lists RobloxForge; <code>forge_status</code> checks everything in one call.</p>
+python connect.py</pre>
+<p>Works with Claude Code and Claude Desktop, Codex CLI and the ChatGPT desktop app, Gemini CLI, VS Code Copilot,
+Cursor, Devin Desktop / Windsurf, Zed and LM Studio. <a href="setup.html"><b>Step-by-step guide for your app &rarr;</b></a></p>
 <h2 id="tools">All {{TOTAL}} tools</h2>
 <input id="q" placeholder="Filter tools -- try terrain, playtest, animation, ui, datastore" autocomplete="off">
 {{CARDS}}
